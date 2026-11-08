@@ -1,20 +1,23 @@
-import { useMany } from "@refinedev/core";
-
+import { useMany,useNavigation } from "@refinedev/core";
+import { useState } from "react";
 import {
   List,
   TextField,
   useTable,
   EditButton,
   ShowButton,
+  CreateButton
 } from "@refinedev/antd";
 
-import { Table, Space } from "antd";
+import { Table ,Modal,Space,Button,Typography } from "antd";
 
 import type { IPost, ICategory } from "../../interfaces";
+import { PostEditModal } from "./editModal";
 
 export const PostList = () => {
+  const { showUrl } = useNavigation();
   const { tableProps } = useTable<IPost>();
-
+  const [editId, setEditId] = useState<number | null>(null);
   const categoryIds =
     tableProps?.dataSource?.map((item) => item.category.id) ?? [];
   const {
@@ -29,7 +32,8 @@ export const PostList = () => {
   });
 
   return (
-    <List>
+    <List >
+        {/* <CreateButton hideText size="small"  /> */}
       <Table {...tableProps} rowKey="id">
         <Table.Column dataIndex="id" title="ID" />
         <Table.Column dataIndex="title" title="Title" />
@@ -40,11 +44,13 @@ export const PostList = () => {
             if (isLoading) {
               return <TextField value="Loading..." />;
             }
-
+          
+            const category = data?.data.find((item) => item.id === value);
+          
             return (
-              <TextField
-                value={data?.data.find((item) => item.id === value)?.title}
-              />
+              <Typography.Link   onClick={() => window.open(showUrl("posts", value), "_blank")}>
+                {category?.title}
+              </Typography.Link>
             );
           }}
         />
@@ -53,12 +59,32 @@ export const PostList = () => {
           dataIndex="actions"
           render={(_, record) => (
             <Space>
-              <EditButton hideText size="small" recordItemId={record.id} />
+              {/* <EditButton hideText size="small" recordItemId={record.id} /> */}
+              <Button
+  size="small"
+  onClick={() => setEditId(record.id)}
+>
+  Edit
+</Button>
               <ShowButton hideText size="small" recordItemId={record.id} />
             </Space>
           )}
         />
       </Table>
+      <Modal
+        open={editId !== null}
+        onCancel={() => setEditId(null)}
+        footer={null}
+        destroyOnHidden
+      >
+        {editId !== null && (
+          <PostEditModal
+            id={editId}
+            onClose={() => setEditId(null)}
+          />
+        )}
+      </Modal>
     </List>
+
   );
 };

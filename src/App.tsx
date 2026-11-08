@@ -30,10 +30,10 @@ import { App as AntdApp, ConfigProvider } from "antd";
 import "@ant-design/v5-patch-for-react-19";
 import "@refinedev/antd/dist/reset.css";
 
-import { PostList, PostEdit, PostShow } from "../src/pages/posts";
+import { PostList, PostEdit,PostCreate, PostShow } from "../src/pages/posts";
 import { DashboardPage } from "../src/pages/dashboard";
 
-const API_URL = "https://api.fake-rest.refine.dev";
+const API_URL = "http://localhost:3001/api";
 
 /**
  *  mock auth credentials to simulate authentication
@@ -163,7 +163,7 @@ const App: React.FC = () => {
 
   return (
     <BrowserRouter>
-      <GitHubBanner />
+      {/* <GitHubBanner /> */}
       <ConfigProvider theme={RefineThemes.Blue}>
         <AntdApp>
           <Refine
@@ -184,6 +184,7 @@ const App: React.FC = () => {
                 list: "/posts",
                 show: "/posts/show/:id",
                 edit: "/posts/edit/:id",
+                create: "/posts/create",
               },
             ]}
             notificationProvider={useNotificationProvider}
@@ -210,10 +211,22 @@ const App: React.FC = () => {
                 <Route path="/posts">
                   <Route index element={<PostList />} />
                   <Route path="edit/:id" element={<PostEdit />} />
-                  <Route path="show/:id" element={<PostShow />} />
+                  {/* <Route path="show/:id" element={<PostShow />} /> */}
+                  <Route path="create" element={<PostCreate />} />
                 </Route>
               </Route>
-
+              <Route
+  element={
+    <Authenticated
+      key="show-page"
+      fallback={<CatchAllNavigate to="/login" />}
+    >
+      <Outlet />
+    </Authenticated>
+  }
+>
+  <Route path="/posts/show/:id" element={<PostShow />} />
+</Route>
               <Route
                 element={
                   <Authenticated key="auth-pages" fallback={<Outlet />}>
@@ -221,6 +234,7 @@ const App: React.FC = () => {
                   </Authenticated>
                 }
               >
+              
                 <Route
                   path="/login"
                   element={
